@@ -1,0 +1,8 @@
+celeba_resized
+#*
+.#*
+__pycache__/
+.ipynb_checkpoints/
+*~
+.flycheck*
+*.png
