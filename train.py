@@ -5,18 +5,19 @@ from torch.distributions.normal import Normal
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 import math
+import os
 
 from image_utils import get_crop_data, plot_images
 from torch_utils import to_gpu
 
-
+RESULTS_DIR = os.environ.get('RESULTS_DIR')
 
 def plot_loss(losses, save=True):
     plt.plot(losses)
-    plt.show()
     if save:
-        plt.savefig('loss.png')
-    
+        plt.savefig(os.path.join(RESULTS_DIR, 'loss.png'))
+    else:
+        plt.show()
 
         
 
@@ -99,32 +100,31 @@ def train_loop(encoder, decoder, data_loader, config):
                 losses.append(loss.cpu().detach().numpy())
                 bar.update(1)
 
-    plt.plot(losses)
-    plt.show()
+        plot_loss(losses, True)
 
-    print('recon')
-    cropped_pictures, crop_channels_en, crop_channels_de, _ = \
-        get_crop_data(bch, image_w // 2, image_h // 2)
+        print('recon')
+        cropped_pictures, crop_channels_en, crop_channels_de, _ = \
+            get_crop_data(bch, image_w // 2, image_h // 2)
 
-    cropped_batch = torch.cat([cropped_pictures, crop_channels_en], 1)
-    cropped_batch = to_gpu(cropped_batch)
-    z = encoder(to_gpu(cropped_batch))
-    decoder.set_decoder_channels(crop_channels_de)
-    z = torch.cat([z.view(bch.shape[0], -1, 2, 2),
-                   to_gpu(crop_channels_de)], 1)
-    pred = decoder(z)
-    plot_images(pred.detach().cpu())
+        cropped_batch = torch.cat([cropped_pictures, crop_channels_en], 1)
+        cropped_batch = to_gpu(cropped_batch)
+        z = encoder(to_gpu(cropped_batch))
+        decoder.set_decoder_channels(crop_channels_de)
+        z = torch.cat([z.view(bch.shape[0], -1, 2, 2),
+                    to_gpu(crop_channels_de)], 1)
+        pred = decoder(z)
+        plot_images(pred.detach().cpu(), file_name=os.path.join(RESULTS_DIR, 'recon_{}'.format(epoch)))
 
-    print('samples')
-    sampler = Normal(0, 1)
-    samples = sampler.rsample((batch_size, latent_size))
-    fake_batch = torch.FloatTensor(np.ones((batch_size, 3,
-                                            image_w, image_h)))
-    _, _, crop_channels_de, crop = \
-        get_crop_data(fake_batch, image_w // 2, image_h // 2)
-    print(crop)
-    decoder.set_decoder_channels(crop_channels_de)
-    samples = torch.cat(
-        [to_gpu(samples.view(batch_size, -1, 2, 2)), to_gpu(crop_channels_de)], 1)
-    test_samples = decoder(to_gpu(samples))
-    plot_images(test_samples.detach().cpu())
+        print('samples')
+        sampler = Normal(0, 1)
+        samples = sampler.rsample((batch_size, latent_size))
+        fake_batch = torch.FloatTensor(np.ones((batch_size, 3,
+                                                image_w, image_h)))
+        _, _, crop_channels_de, crop = \
+            get_crop_data(fake_batch, image_w // 2, image_h // 2)
+        print(crop)
+        decoder.set_decoder_channels(crop_channels_de)
+        samples = torch.cat(
+            [to_gpu(samples.view(batch_size, -1, 2, 2)), to_gpu(crop_channels_de)], 1)
+        test_samples = decoder(to_gpu(samples))
+        plot_images(test_samples.detach().cpu(), file_name=os.path.join(RESULTS_DIR, 'samples_{}'.format(epoch)))
