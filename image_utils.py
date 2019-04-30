@@ -28,6 +28,7 @@ def plot_images(images, is_numpy=False, file_name=None):
         plt.savefig('{}.png'.format(file_name))
     else:
         plt.show()
+    plt.clf()
 
 def crop_picture(picture, origin, width, height):
     # return pucture[channels, cropped width, cropped height]

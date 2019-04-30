@@ -8,7 +8,7 @@ DATASET = 'celeba'
 
 BATCH_SIZE = 32
 BASE_FEATURES = 64
-LATENT_SIZE = 64
+LATENT_SIZE = 32
 NUM_EPOCHS = 30
 
 def init():
@@ -21,7 +21,7 @@ def init():
     }
 
     decoder_config = {
-        'input_channels': 18,
+        'input_channels': 10,
         'base_features': BASE_FEATURES,
         'output_channels': 3
     }

@@ -2,6 +2,8 @@ from torch import nn
 import torch
 from skimage import transform
 
+from torch_utils import to_gpu
+
 class CelebEncoder(nn.Module):
 
     def __init__(self, input_channels, base_features, latent_size):
@@ -29,8 +31,7 @@ class CelebEncoder(nn.Module):
             nn.Conv2d(self.base_features*4, self.base_features *
                       8, 4, 2, 1, bias=False),
             nn.BatchNorm2d(self.base_features*8),
-            nn.LeakyReLU(0.2),
-
+            nn.Tanh()
         )
         self.linear = nn.Linear(self.base_features*8 * 4 * 4, self.latent_size)
 
@@ -136,7 +137,7 @@ class CelebDecoder(nn.Module):
 
 def create_models(dataset, encoder_config, decoder_config):
     if dataset == 'celeba':
-        return CelebEncoder(**encoder_config), CelebDecoder(**decoder_config)
+        return to_gpu(CelebEncoder(**encoder_config)), to_gpu(CelebDecoder(**decoder_config))
     elif dataset == 'mnist':
         raise NotImplementedError()
     else:

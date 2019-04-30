@@ -18,7 +18,7 @@ def plot_loss(losses, save=True):
         plt.savefig(os.path.join(RESULTS_DIR, 'loss.png'))
     else:
         plt.show()
-
+    plt.clf()
         
 
 def train_loop(encoder, decoder, data_loader, config):

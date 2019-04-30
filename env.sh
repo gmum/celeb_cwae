@@ -1,1 +1,1 @@
-export RESULTS_DIR="~/dev/data/cwae/"
+export RESULTS_DIR="$HOME/dev/data/cwae/"
