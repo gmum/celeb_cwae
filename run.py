@@ -21,7 +21,7 @@ def init():
     }
 
     decoder_config = {
-        'input_channels': 10,
+        'input_channels': LATENT_SIZE // 4 + 2,
         'base_features': BASE_FEATURES,
         'output_channels': 3
     }
